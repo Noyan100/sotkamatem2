@@ -4,10 +4,10 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { collectionId: string } }
+    { params }: { params: Promise<{ collectionId: string }> }
 ) {
     try {
-        const { collectionId } = params;
+        const collectionId = (await params).collectionId;
 
         const solutions = await prisma.userSolution.findMany({
             where: {

@@ -33,7 +33,11 @@ const DEFAULT_LIMIT = 10;
 export const TaskList = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const rawSearchParams = useSearchParams();
+
+  // Создаем безопасный объект searchParams
+  const searchParams = rawSearchParams || new URLSearchParams();
+
   const [state, setState] = useState<{
     tasks: Task[] | null;
     loading: boolean;
@@ -320,7 +324,7 @@ export const TaskList = () => {
             sources={task.sources}
             solution={task.solution}
             answer={task.answer}
-            type={task.type}
+            type={task.type ?? undefined}
             videoSrc={task.videoSrc}
             onDelete={handleDeleteTask}
             onUpdate={handleUpdateTask}

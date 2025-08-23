@@ -13,11 +13,10 @@ type Assignment = {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params; // Await params здесь!
-    const assignmentId = id;
+    const assignmentId = (await params).id;
 
     // Получаем текущее задание
     const currentAssignment = await prisma.assignment.findUnique({
@@ -81,10 +80,10 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const assignmentId = params.id;
+    const assignmentId = (await params).id;
     const { title, description } = await request.json();
 
     // Проверяем, существует ли задание

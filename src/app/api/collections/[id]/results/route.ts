@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,7 +17,7 @@ export async function GET(
       );
     }
 
-    const collectionId = parseInt(params.id);
+    const collectionId = parseInt((await params).id);
     if (isNaN(collectionId)) {
       return new NextResponse(
         JSON.stringify({ error: 'Invalid collection ID' }),

@@ -43,7 +43,7 @@ type Source = {
 
 type SolutionBlock =
   | { type: "text"; content: string }
-  | { type: "image"; file: File | null; previewUrl: string | null };
+  | { type: "image"; file?: File | null; previewUrl?: string | null };
 
 interface Props {
   className?: string;
@@ -106,9 +106,9 @@ export const TaskCard: React.FC<Props> = ({
       : [sources]
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const solutionImageRefs = useRef<(HTMLInputElement | null)[]>([]);
   const taskCardRef = useRef<HTMLDivElement>(null);
   const solutionRef = useRef<HTMLDivElement>(null);
+  const solutionImageRefs = useRef<HTMLInputElement[]>([]);
   const imageSectionRef = useRef<HTMLDivElement>(null);
   const [focusedBlockIndex, setFocusedBlockIndex] = useState<number | null>(
     null
@@ -232,7 +232,7 @@ export const TaskCard: React.FC<Props> = ({
   };
 
   const copyAsImage = async (
-    ref: React.RefObject<HTMLDivElement>,
+    ref: React.RefObject<HTMLDivElement | null>, // Allow null
     name: string
   ) => {
     if (!ref.current) return;
@@ -299,11 +299,14 @@ export const TaskCard: React.FC<Props> = ({
       const previewUrl = URL.createObjectURL(file);
 
       const newBlocks = [...editedSolutionBlocks];
-      newBlocks[index] = {
-        ...newBlocks[index],
-        file,
-        previewUrl,
-      };
+      if (newBlocks[index].type === "image") {
+        newBlocks[index] = {
+          ...newBlocks[index],
+          file,
+          previewUrl,
+        };
+        setEditedSolutionBlocks(newBlocks);
+      }
       setEditedSolutionBlocks(newBlocks);
     }
   };
@@ -345,7 +348,11 @@ export const TaskCard: React.FC<Props> = ({
               type="file"
               accept="image/*"
               onChange={(e) => handleSolutionImageChange(e, index)}
-              ref={(el) => (solutionImageRefs.current[index] = el)}
+              ref={(el) => {
+                if (el) {
+                  solutionImageRefs.current[index] = el;
+                }
+              }}
               placeholder="Выберите файл или вставьте изображение через Ctrl+V"
             />
           </div>

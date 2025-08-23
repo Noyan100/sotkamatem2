@@ -4,11 +4,11 @@ import prisma from '@/lib/prisma'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const accesses = await prisma.userLessonAccess.findMany({
-      where: { recordingId: Number(params.id) },
+      where: { recordingId: Number((await params).id) },
       select: { userId: true }
     })
     return NextResponse.json({ accesses })
@@ -21,11 +21,11 @@ export async function GET(
 }
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userIds } = await request.json()
-    const recordingId = Number(params.id)
+    const recordingId = Number((await params).id)
 
     // Удаляем старые доступы
     await prisma.userLessonAccess.deleteMany({

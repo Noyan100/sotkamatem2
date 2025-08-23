@@ -1,32 +1,89 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { id } = req.query
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const id = (await params).id
 
-  if (!id || Array.isArray(id)) {
-    res.status(400).json({ error: 'Invalid ID' })
-    return
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+    }
+
+    const user = await prisma.user.findUnique({ 
+      where: { id: Number(id) } 
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    return NextResponse.json(user)
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
+}
 
-  if (req.method === 'GET') {
-    const user = await prisma.user.findUnique({ where: { id: Number(id) } })
-    if (user) res.status(200).json(user)
-    else res.status(404).json({ error: 'User not found' })
-  } else if (req.method === 'PUT') {
-    const { name, email, password } = req.body
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const id  = (await params).id
+
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+    }
+
+    const { name, email, password } = await request.json()
+
     const updatedUser = await prisma.user.update({
       where: { id: Number(id) },
       data: { name, email, password },
     })
-    res.status(200).json(updatedUser)
-  } else if (req.method === 'DELETE') {
-    await prisma.user.delete({ where: { id: Number(id) } })
-    res.status(204).end()
-  } else {
-    res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
-    res.status(405).end(`Method ${req.method} Not Allowed`)
+
+    return NextResponse.json(updatedUser)
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('RecordNotFound')) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const id = (await params).id
+
+    if (!id) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+    }
+
+    await prisma.user.delete({ 
+      where: { id: Number(id) } 
+    })
+
+    return new NextResponse(null, { status: 204 })
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('RecordNotFound')) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

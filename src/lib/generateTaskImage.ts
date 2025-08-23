@@ -41,7 +41,7 @@ export async function generateTaskImage(task: Task): Promise<string | null> {
         <body>
           <div class="task-container">
             <div class="task-number">Задача ${task.number}</div>
-            <div class="task-content">${task.content}</div>
+            <div class="task-content">${task.text}</div>
           </div>
         </body>
       </html>

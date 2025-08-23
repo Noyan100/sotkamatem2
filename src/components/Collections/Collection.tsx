@@ -32,7 +32,8 @@ interface Collection {
 }
 
 export default function Collection() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id as string;
   const [collection, setCollection] = useState<Collection | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

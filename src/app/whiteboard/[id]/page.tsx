@@ -26,13 +26,23 @@ type WhiteboardData = {
   };
 };
 
+export type WhiteboardHandle = {
+  save: () => Promise<boolean>;
+};
+
+type WhiteboardProps = {
+  whiteboardId: string;
+  whiteboardTitle?: string;
+  // другие пропсы, если есть
+};
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function WhiteboardPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
-  const whiteboardRef = useRef(null);
+  const whiteboardRef = useRef<WhiteboardHandle>(null);
   const { data: session, status } = useSession();
   useEffect(() => {
     if (status === "authenticated" && (session.user as any)?.role !== "ADMIN") {

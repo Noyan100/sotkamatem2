@@ -8,7 +8,7 @@
 
   export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: {params: Promise<{ id: string }> }
   ) {
     try {
       const session = await getServerSession(authOptions);
@@ -31,7 +31,7 @@
         );
       }
 
-      const collectionId = parseInt(params.id);
+      const collectionId = parseInt((await params).id);
       if (isNaN(collectionId)) {
         return NextResponse.json(
           { error: 'Неверный ID подборки' },
@@ -77,7 +77,7 @@
 
   export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Проверка авторизации
@@ -90,7 +90,7 @@
     }
 
     // Валидация ID подборки
-    const collectionId = parseInt(params.id);
+    const collectionId = parseInt((await params).id);
     if (isNaN(collectionId)) {
       return NextResponse.json(
         { error: 'Неверный ID подборки' },

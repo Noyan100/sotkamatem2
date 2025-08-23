@@ -3,14 +3,15 @@ import prisma from '@/lib/prisma';
 
 export async function POST(
   req: Request,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const { userIds } = await req.json();
+    const groupId = (await params).groupId;
     
     await prisma.groupUser.createMany({
       data: (Array.isArray(userIds) ? userIds : [userIds]).map((userId: number) => ({
-        groupId: Number(params.groupId),
+        groupId: Number(groupId),
         userId
       })),
       skipDuplicates: true

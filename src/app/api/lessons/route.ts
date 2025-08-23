@@ -55,11 +55,11 @@ export async function POST(request: Request) {
 // Получение списка пользователей с доступом к уроку
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const accesses = await prisma.userLessonAccess.findMany({
-      where: { recordingId: parseInt(params.id) },
+      where: { recordingId: parseInt((await params).id) },
       include: { user: true },
     });
 

@@ -3,11 +3,11 @@ import prisma from '@/lib/prisma';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { payment } = await request.json();
-    const userId = Number(params.id);
+    const userId = Number((await params).id);
 
 
     // Валидация userId

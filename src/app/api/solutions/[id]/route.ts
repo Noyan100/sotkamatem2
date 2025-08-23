@@ -6,10 +6,10 @@ import path from 'path';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const solutionId = parseInt(params.id);
+    const solutionId = parseInt((await params).id);
     
     if (isNaN(solutionId)) {
       return NextResponse.json(

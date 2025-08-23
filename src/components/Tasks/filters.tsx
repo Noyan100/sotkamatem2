@@ -20,16 +20,24 @@ interface Props {
 export const Filters: React.FC<Props> = ({ className }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Create a safe way to access search params
+  const getSearchParams = () => {
+    return searchParams
+      ? new URLSearchParams(searchParams.toString())
+      : new URLSearchParams();
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  // Get current filter values
-  const currentNumbers = searchParams.getAll("number");
-  const currentTypes = searchParams.getAll("type");
-  const currentSources = searchParams.getAll("sourceType");
-  const currentYears = searchParams.getAll("year");
-  const currentWaves = searchParams.getAll("wave");
-  const currentSearch = searchParams.get("search") || "";
+  // Get current filter values safely
+  const currentNumbers = searchParams?.getAll("number") || [];
+  const currentTypes = searchParams?.getAll("type") || [];
+  const currentSources = searchParams?.getAll("sourceType") || [];
+  const currentYears = searchParams?.getAll("year") || [];
+  const currentWaves = searchParams?.getAll("wave") || [];
+  const currentSearch = searchParams?.get("search") || "";
 
   // Initialize search query from URL
   useEffect(() => {
@@ -69,7 +77,7 @@ export const Filters: React.FC<Props> = ({ className }) => {
   // Handle search
   const handleSearch = useCallback(
     (query: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = getSearchParams();
 
       if (query.trim()) {
         params.set("search", query.trim());
@@ -99,7 +107,7 @@ export const Filters: React.FC<Props> = ({ className }) => {
 
   // Multi-filter handler
   const handleMultiFilter = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = getSearchParams();
     const currentValues = params.getAll(key);
 
     if (currentValues.includes(value)) {
@@ -116,12 +124,12 @@ export const Filters: React.FC<Props> = ({ className }) => {
 
   // Check if filter is active
   const isActive = (key: string, value: string) => {
-    return searchParams.getAll(key).includes(value);
+    return searchParams?.getAll(key).includes(value) || false;
   };
 
   // Reset specific filter
   const resetFilter = (key: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = getSearchParams();
     params.delete(key);
     params.delete("page");
     router.push(`?${params.toString()}`);

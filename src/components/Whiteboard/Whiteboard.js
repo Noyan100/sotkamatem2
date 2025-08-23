@@ -58,7 +58,7 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 
-const Whiteboard = forwardRef(({ whiteboardId, whiteboardTitle }, ref) => {
+const Whiteboard = forwardRef((whiteboardTitle, ref, whiteboardId) => {
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 
   const canvasRef = useRef(null);

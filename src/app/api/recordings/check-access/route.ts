@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ hasAccess: false }, { status: 200 })
   }
 
-  const hasAccess = recording.isPublic || recording.accesses.length > 0
+  const hasAccess = recording.accesses.length > 0
 
   return NextResponse.json({ hasAccess }, { status: 200 })
 }

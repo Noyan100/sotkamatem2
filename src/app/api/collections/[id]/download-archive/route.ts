@@ -3,9 +3,9 @@ import prisma from '@/lib/prisma';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const id = (await params).id;
 
   if (!id || Array.isArray(id)) {
     return NextResponse.json(

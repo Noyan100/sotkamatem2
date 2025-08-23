@@ -4,11 +4,11 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const collection = await prisma.collectionAssignment.findUnique({
-      where: { id: Number(params.id) },
+      where: { id: Number((await params).id) },
       include: {
         assignments: {
           include: {
@@ -37,13 +37,13 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { title } = await request.json();
 
     const updatedCollection = await prisma.collectionAssignment.update({
-      where: { id: Number(params.id) },
+      where: { id: Number((await params).id) },
       data: {
         title,
       },
@@ -61,11 +61,11 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await prisma.collectionAssignment.delete({
-      where: { id: Number(params.id) },
+      where: { id: Number((await params).id) },
     });
 
     return NextResponse.json(
@@ -83,11 +83,11 @@ export async function DELETE(
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { title, description } = await request.json();
-    const collectionId = Number(params.id);
+    const collectionId = Number((await params).id);
 
     if (!title) {
       return NextResponse.json(
@@ -98,26 +98,25 @@ export async function POST(
 
     // Создаем новое задание с автоматически созданной первой доской
     const newAssignment = await prisma.$transaction(async (prisma) => {
+      // Сначала создаем assignment
       const assignment = await prisma.assignment.create({
         data: {
           title,
           description: description || '',
-          collectionAssignment: {
-            connect: { id: collectionId }
-          }
+          collectionAssignmentId: collectionId
         }
       });
 
-      // Создаем первую доску для задания
-      await prisma.whiteboard.create({
+      // Затем создаем whiteboard с правильной структурой данных
+      const whiteboard = await prisma.whiteboard.create({
         data: {
           title: 'Страница 1',
-          assignment: {
-            connect: { id: assignment.id }
-          }
+          assignmentId: assignment.id,
+          data: {} // Пустой объект JSON для данных доски
         }
       });
 
+      // Возвращаем assignment с включенными whiteboards
       return await prisma.assignment.findUnique({
         where: { id: assignment.id },
         include: {

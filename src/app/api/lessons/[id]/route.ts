@@ -6,7 +6,7 @@ import path from 'path';
 // Обновление урока (PUT для полного обновления, PATCH для частичного)
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Получаем данные как FormData
@@ -28,7 +28,7 @@ export async function PUT(
 
     // Получаем текущий урок
     const lesson = await prisma.lessonRecording.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt((await params).id) },
     });
 
     if (!lesson) {
@@ -51,7 +51,7 @@ export async function PUT(
 
         // Сохраняем новый файл
         const uploadDir = path.join(process.cwd(), 'public', 'lectures');
-        const fileName = `lesson_${params.id}_${Date.now()}.pdf`;
+        const fileName = `lesson_${(await params).id}_${Date.now()}.pdf`;
         const filePath = path.join(uploadDir, fileName);
 
         // Создаем директорию, если ее нет
@@ -80,7 +80,7 @@ export async function PUT(
 
     // Обновляем урок в базе данных
     const updatedLesson = await prisma.lessonRecording.update({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt((await params).id) },
       data: {
         title,
         description: description || null,
@@ -101,12 +101,12 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Проверяем существование урока
     const lesson = await prisma.lessonRecording.findUnique({
-      where: { id: Number(params.id) },
+      where: { id: Number((await params).id) },
     });
 
     if (!lesson) {
@@ -130,12 +130,12 @@ export async function DELETE(
 
     // Удаляем связанные записи о доступах
     await prisma.userLessonAccess.deleteMany({
-      where: { recordingId: Number(params.id) },
+      where: { recordingId: Number((await params).id) },
     });
 
     // Удаляем сам урок
     await prisma.lessonRecording.delete({
-      where: { id: Number(params.id) },
+      where: { id: Number((await params).id) },
     });
 
     return NextResponse.json(
