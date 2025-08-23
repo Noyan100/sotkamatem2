@@ -12,14 +12,6 @@ import { useSession } from "next-auth/react";
 export default function Home() {
   const { data: session, status } = useSession();
 
-  if (session?.user?.payment !== undefined && session.user.payment < 0) {
-    return <NoMoney />;
-  }
-
-  if (!session?.user) {
-    return <NoMAuth />;
-  }
-
   return (
     <div className="bg-gray-200 min-h-screen">
       <Navigation />

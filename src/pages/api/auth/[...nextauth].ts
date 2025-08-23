@@ -26,11 +26,6 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-      authorization: {
-        params: {
-          redirect_uri: "https://sotkamatem2-jr8i.vercel.app/api/auth/callback/google"
-        }
-      }
     }),
   ],
   callbacks: {
