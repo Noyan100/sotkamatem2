@@ -1,0 +1,191 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id                    Int                    @id @default(autoincrement())
+    name                  String
+    email                 String                 @unique
+    password              String
+    role                  String                 @default("USER") // Добавил роли (USER, ADMIN)
+    createdAt             DateTime               @default(now())
+    payment               Int?                   @default(0)
+    updatedAt             DateTime               @updatedAt
+    solutions             UserSolution[] // Решения пользователя
+    GroupUser             GroupUser[]
+    accessibleCollections UserCollectionAccess[]
+    lessonAccesses        UserLessonAccess[] // Доступы к записям занятий
+}
+
+model LessonRecording {
+    id          Int                @id @default(autoincrement())
+    title       String
+    description String?
+    vkVideoUrl  String // Полная ссылка на видео в VK
+    pdfUrl      String? // Добавляем поле для PDF
+    createdAt   DateTime           @default(now())
+    updatedAt   DateTime           @updatedAt
+    accesses    UserLessonAccess[] // Прямые доступы пользователей
+}
+
+model UserLessonAccess {
+    user        User            @relation(fields: [userId], references: [id])
+    userId      Int
+    recording   LessonRecording @relation(fields: [recordingId], references: [id])
+    recordingId Int
+    grantedAt   DateTime        @default(now())
+
+    @@id([userId, recordingId])
+}
+
+model Group {
+    id          Int         @id @default(autoincrement())
+    name        String
+    description String?
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    members     GroupUser[] // Участники группы
+    isActive    Boolean     @default(true) // Активна ли группа
+}
+
+model GroupUser {
+    group    Group    @relation(fields: [groupId], references: [id])
+    groupId  Int
+    user     User     @relation(fields: [userId], references: [id])
+    userId   Int
+    joinedAt DateTime @default(now())
+
+    @@id([groupId, userId])
+}
+
+model UserCollectionAccess {
+    user         User       @relation(fields: [userId], references: [id])
+    userId       Int
+    collection   Collection @relation(fields: [collectionId], references: [id])
+    collectionId Int
+    createdAt    DateTime   @default(now())
+
+    @@id([userId, collectionId])
+    @@index([userId])
+    @@index([collectionId])
+}
+
+model Task {
+    id        Int              @id @default(autoincrement())
+    number    String
+    image     String?
+    text      String
+    sources   Json
+    solution  String
+    answer    String
+    type      String?
+    videoSrc  String?
+    createdAt DateTime         @default(now())
+    updatedAt DateTime         @updatedAt
+    tasks     CollectionTask[]
+    solutions TaskSolution[] // Решения этой задачи
+}
+
+model Collection {
+    id                   Int                    @id @default(autoincrement())
+    name                 String
+    description          String? // Описание подборки
+    isPublished          Boolean                @default(false) // Опубликована ли подборка
+    collections          CollectionTask[]
+    createdAt            DateTime               @default(now())
+    solutions            UserSolution[] // Решения этой подборки
+    CollectionAssignment CollectionAssignment[]
+    sharedWithUsers      UserCollectionAccess[]
+}
+
+model CollectionTask {
+    collection   Collection @relation(fields: [collectionId], references: [id])
+    collectionId Int
+    task         Task       @relation(fields: [taskId], references: [id])
+    taskId       Int
+    order        Int?
+
+    @@id([collectionId, taskId])
+}
+
+model SolutionImage {
+    id         Int          @id @default(autoincrement())
+    solution   UserSolution @relation(fields: [solutionId], references: [id])
+    solutionId Int
+    image      String?
+    createdAt  DateTime     @default(now())
+
+    // Связь с решением задачи
+    taskSolution   TaskSolution? @relation(fields: [taskSolutionId], references: [id])
+    taskSolutionId Int?
+}
+
+// Новая модель: решение подборки пользователем
+model UserSolution {
+    id            Int             @id @default(autoincrement())
+    user          User            @relation(fields: [userId], references: [id])
+    userId        Int
+    collection    Collection      @relation(fields: [collectionId], references: [id])
+    collectionId  Int
+    startedAt     DateTime        @default(now()) // Когда начал решать
+    finishedAt    DateTime? // Когда закончил (null если еще не закончил)
+    score         Int? // Баллы/результат
+    taskSolutions TaskSolution[] // Решения отдельных задач в этой подборке
+    createdAt     DateTime        @default(now())
+    images        SolutionImage[]
+}
+
+// Новая модель: решение конкретной задачи в подборке
+model TaskSolution {
+    id             Int             @id @default(autoincrement())
+    userSolution   UserSolution    @relation(fields: [userSolutionId], references: [id])
+    userSolutionId Int
+    task           Task            @relation(fields: [taskId], references: [id])
+    taskId         Int
+    userAnswer     String // Ответ пользователя
+    isCorrect      Boolean // Правильно ли решено
+    solvedAt       DateTime        @default(now()) // Когда решена
+    timeSpent      Int? // Время в секундах на решение
+    createdAt      DateTime        @default(now())
+    SolutionImage  SolutionImage[]
+}
+
+model Whiteboard {
+    id           String      @id @default(uuid())
+    title        String // Например: "Конспект лекции 1"
+    nextOrder    String?
+    prevOrder    String?
+    data         Json // Все данные доски
+    assignment   Assignment? @relation(fields: [assignmentId], references: [id], onDelete: Cascade) // Связь с заданием
+    assignmentId String? // ID задания (опционально, если доска может быть без задания)
+    createdAt    DateTime    @default(now())
+    updatedAt    DateTime    @updatedAt
+}
+
+model Assignment {
+    id                     String               @id @default(uuid())
+    title                  String // Название задания
+    description            String? // Описание (опционально)
+    nextOrder              String?
+    prevOrder              String?
+    whiteboards            Whiteboard[] // Связь с досками (страницами)
+    createdAt              DateTime             @default(now())
+    updatedAt              DateTime             @updatedAt
+    collectionAssignment   CollectionAssignment @relation(fields: [collectionAssignmentId], references: [id], onDelete: Cascade)
+    collectionAssignmentId Int
+}
+
+model CollectionAssignment {
+    id           Int          @id @default(autoincrement())
+    title        String?
+    assignments  Assignment[] // Теперь это массив заданий
+    collection   Collection   @relation(fields: [collectionId], references: [id])
+    collectionId Int // Связь с конкретной коллекцией
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
+}
