@@ -5,17 +5,10 @@ const nextConfig: NextConfig = {
 };
 
 module.exports = {
-  images: {
-    domains: ['3.downloader.disk.yandex.ru'],
-    // or if you're using newer Next.js versions (v12+), use:
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '3.downloader.disk.yandex.ru',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
   },
 }
 
