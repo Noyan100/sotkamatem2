@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# РепетиТоп (RepetiTop) — MVP веб-интерфейс
 
-## Getting Started
+## 📌 Описание проекта
 
-First, run the development server:
+**РепетиТоп** — это интеллектуальная платформа для автоматизации работы репетиторов:
+проверка домашних заданий, коммуникация с учениками и прозрачная отчетность для родителей.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Данный репозиторий содержит **MVP веб-интерфейса**, реализованный в рамках практической работы (ПР-04).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Демо
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🔗 https://v0-ux-bae7.vercel.app/tutor
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🎯 Цель MVP
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Создать минимально жизнеспособный продукт, который:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* упрощает проверку домашних заданий для репетитора
+* показывает прогресс ученика родителю
+* демонстрирует ключевые сценарии продукта
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 👥 Роли пользователей
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 👩‍🏫 Репетитор (Tutor)
+
+* загружает и проверяет домашние задания
+* управляет учениками
+* отправляет результаты
+
+### 👩 Родитель (Parent)
+
+* просматривает прогресс ребенка
+* получает отчеты
+* контролирует оплату
+
+---
+
+## 🖥️ Реализованные экраны
+
+* Главный экран / Dashboard
+* Кабинет репетитора
+* Кабинет родителя
+* Экран проверки домашних работ
+* (опционально) экран базы данных
+
+---
+
+## 🔄 Основной пользовательский сценарий
+
+1. Репетитор загружает домашнюю работу
+2. Система выполняет проверку
+3. Отображается результат (ошибки, оценка)
+4. Родитель просматривает прогресс
+
+---
+
+## 📊 Используемые сущности (ПР-03)
+
+В проекте реализованы следующие сущности:
+
+* **Student** — ученик
+* **Homework** — домашняя работа
+* **ReviewResult** — результат проверки
+* **Payment** — информация об оплате
+* **Notification** — уведомления
+
+---
+
+
+## 👨‍💻 Автор
+
+Студент группы КИ23-12Б
+Н.Р. Абышкин
